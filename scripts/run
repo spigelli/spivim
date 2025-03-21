@@ -1,0 +1,13 @@
+#!/bin/bash
+# This script is used to run neovim with the configuration located in ../src
+
+# Get the absolute path of the script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Change directory to the workspace root
+cd "${SCRIPT_DIR}/.."
+
+# nvim -u ./init.lua
+XDG_CONFIG_HOME="$PWD" \
+NVIM_APPNAME="src" \
+nvim .
