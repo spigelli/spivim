@@ -64,9 +64,6 @@ function M.init()
   -- Bootstrap lazy.nvim if not installed
   bootstrap_lazy()
 
-  -- Bootstrap lazyvim if not installed
-  bootstrap_lazyvim()
-
   -- Load the rest of the configuration
   require("config").setup()
 
