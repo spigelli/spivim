@@ -61,9 +61,6 @@ M.setup = function(opts)
         load_autocmds()
       end
 
-      -- Load the keymaps
-      load_keymaps()
-
       -- Load lazy.nvim defaults
       -- LazyVim.format.setup()
       -- LazyVim.news.setup()
