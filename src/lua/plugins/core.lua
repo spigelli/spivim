@@ -16,5 +16,6 @@ return {
       end
     end,
   },
-  { import = "plugins.languages", }
+  { import = "plugins.languages" },
+  { import = "plugins.features" }
 }
