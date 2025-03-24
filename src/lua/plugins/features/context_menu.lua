@@ -12,29 +12,6 @@ return {
                 local api = require("nvim-tree.api")
                 local node = api.tree.get_node_under_cursor
                 local nested_menus = {
-
-                    -- color = {
-
-                    --     {
-                    --         name = "Color Picker",
-                    --         cmd = "CccPick",
-                    --     },
-
-                    --     {
-                    --         name = "Huefy",
-                    --         cmd = function()
-                    --             require("minty.huefy").open({ border = true })
-                    --         end,
-                    --     },
-
-                    --     {
-                    --         name = "Shades",
-                    --         cmd = function()
-                    --             require("minty.shades").open({ border = true })
-                    --         end,
-                    --     },
-                    -- },
-
                     lsp = {
 
                         {
@@ -110,212 +87,227 @@ return {
                     },
                 }
 
-                local main_menu = {
-                    main = {
+        local main_menu = {
+          main = {
+            border = true,
+            {
+              name = "Format Buffer",
+              cmd = function()
+                local ok, conform = pcall(require, "conform")
 
-                        {
-                            name = "Format Buffer",
-                            cmd = function()
-                                local ok, conform = pcall(require, "conform")
+                if ok then
+                  conform.format({ lsp_fallback = true })
+                else
+                  vim.lsp.buf.format()
+                end
+              end,
+              rtxt = "<A-f>",
+            },
 
-                                if ok then
-                                    conform.format({ lsp_fallback = true })
-                                else
-                                    vim.lsp.buf.format()
-                                end
-                            end,
-                            rtxt = "<A-f>",
-                        },
+            {
+              name = "Code Actions",
+              cmd = vim.lsp.buf.code_action,
+              rtxt = "<leader>la",
+            },
 
-                        {
-                            name = "Code Actions",
-                            cmd = vim.lsp.buf.code_action,
-                            rtxt = "<leader>la",
-                        },
+            { name = "separator" },
 
-                        { name = "separator" },
+            {
+              name = " Lsp Actions",
+              hl = "Exblue",
+              items = nested_menus.lsp,
+            },
 
-                        {
-                            name = " Lsp Actions",
-                            hl = "Exblue",
-                            items = nested_menus.lsp,
-                        },
+            { name = "separator" },
 
-                        { name = "separator" },
+            {
+              name = "Run code",
+              cmd = "RunCode",
+            },
 
-                        {
-                            name = "Run code",
-                            cmd = "RunCode",
-                        },
+            {
+              name = "Edit Config",
+              cmd = "e $MYVIMRC | :cd %:p:h",
+            },
 
-                        {
-                            name = "Edit Config",
-                            cmd = "e $MYVIMRC | :cd %:p:h",
-                        },
+            {
+              name = "Copy Content",
+              cmd = "%y+",
+            },
 
-                        {
-                            name = "Copy Content",
-                            cmd = "%y+",
-                        },
+            {
+              name = "Delete Content",
+              cmd = "%d",
+            },
 
-                        {
-                            name = "Delete Content",
-                            cmd = "%d",
-                        },
+            { name = "separator" },
 
-                        { name = "separator" },
+            {
+              name = " Open terminal",
+              hl = "ExRed",
+              cmd = "ToggleTerm direction=float",
+            },
 
-                        {
-                            name = " Open terminal",
-                            hl = "ExRed",
-                            cmd = "ToggleTerm direction=float",
-                        },
+            { name = "separator" },
 
-                        { name = "separator" },
+            {
+              name = "󰏘 Colors",
+              items = nested_menus.color,
+            },
 
-                        {
-                            name = "󰏘 Colors",
-                            items = nested_menus.color,
-                        },
+            {
+              name = "Inspect",
+              cmd = function()
+                -- Execute vim.show_pos() in normal mode
+                vim.cmd("Inspect!")
+              end,
+            },
+            {
+              name = "Inspect Pretty",
+              cmd = function()
+                -- Execute vim.show_pos() in normal mode
+                vim.cmd("Inspect")
+              end,
+            },
 
-                        { name = "separator" },
+            { name = "separator" },
 
-                        {
-                            name = "Close",
-                            cmd = "q",
-                        },
-                    },
+            {
+              name = "Close",
+              cmd = "q",
+            },
+          },
 
-                    tree = {
+          tree = {
 
-                        {
-                            name = " New file",
-                            cmd = function()
-                                api.fs.create(node())
-                            end,
-                            rtxt = "a",
-                        },
+            {
+              name = " New file",
+              cmd = function()
+                api.fs.create(node())
+              end,
+              rtxt = "a",
+            },
 
-                        {
-                            name = " New folder",
-                            cmd = function()
-                                api.fs.create(node())
-                            end,
-                            rtxt = "a",
-                        },
+            {
+              name = " New folder",
+              cmd = function()
+                api.fs.create(node())
+              end,
+              rtxt = "a",
+            },
 
-                        { name = "separator" },
+            { name = "separator" },
 
-                        {
-                            name = " Open in window",
-                            cmd = function()
-                                api.node.open.edit(node())
-                            end,
-                            rtxt = "o",
-                        },
+            {
+              name = " Open in window",
+              cmd = function()
+                api.node.open.edit(node())
+              end,
+              rtxt = "o",
+            },
 
-                        {
-                            name = " Open in vertical split",
-                            cmd = function()
-                                api.node.open.vertical(node())
-                            end,
-                            rtxt = "v",
-                        },
+            {
+              name = " Open in vertical split",
+              cmd = function()
+                api.node.open.vertical(node())
+              end,
+              rtxt = "v",
+            },
 
-                        {
-                            name = " Open in horizontal split",
-                            cmd = function()
-                                api.node.open.horizontal(node())
-                            end,
-                            rtxt = "s",
-                        },
+            {
+              name = " Open in horizontal split",
+              cmd = function()
+                api.node.open.horizontal(node())
+              end,
+              rtxt = "s",
+            },
 
-                        {
-                            name = "󰓪 Open in new tab",
-                            cmd = function()
-                                api.node.open.tab(node())
-                            end,
-                            rtxt = "O",
-                        },
+            {
+              name = "󰓪 Open in new tab",
+              cmd = function()
+                api.node.open.tab(node())
+              end,
+              rtxt = "O",
+            },
 
-                        { name = "separator" },
+            { name = "separator" },
 
-                        {
-                            name = " Cut",
-                            cmd = function()
-                                api.fs.cut(node())
-                            end,
-                            rtxt = "x",
-                        },
+            {
+              name = " Cut",
+              cmd = function()
+                api.fs.cut(node())
+              end,
+              rtxt = "x",
+            },
 
-                        {
-                            name = " Paste",
-                            cmd = function()
-                                api.fs.paste(node())
-                            end,
-                            rtxt = "p",
-                        },
+            {
+              name = " Paste",
+              cmd = function()
+                api.fs.paste(node())
+              end,
+              rtxt = "p",
+            },
 
-                        {
-                            name = "󰆏 Copy",
-                            cmd = function()
-                                api.fs.copy.node(node())
-                            end,
-                            rtxt = "c",
-                        },
+            {
+              name = "󰆏 Copy",
+              cmd = function()
+                api.fs.copy.node(node())
+              end,
+              rtxt = "c",
+            },
 
-                        {
-                            name = "󰴠 Copy absolute path",
-                            cmd = function()
-                                api.fs.copy.absolute_path(node())
-                            end,
-                            rtxt = "gy",
-                        },
+            {
+              name = "󰴠 Copy absolute path",
+              cmd = function()
+                api.fs.copy.absolute_path(node())
+              end,
+              rtxt = "gy",
+            },
 
-                        {
-                            name = " Copy relative path",
-                            cmd = function()
-                                api.fs.copy.relative_path(node())
-                            end,
-                            rtxt = "Y",
-                        },
+            {
+              name = " Copy relative path",
+              cmd = function()
+                api.fs.copy.relative_path(node())
+              end,
+              rtxt = "Y",
+            },
 
-                        { name = "separator" },
+            { name = "separator" },
 
-                        {
-                            name = " Open in terminal",
-                            hl = "ExBlue",
-                            cmd = "ToggleTerm direction=float",
-                        },
+            {
+              name = " Open in terminal",
+              hl = "ExBlue",
+              cmd = "ToggleTerm direction=float",
+            },
 
-                        { name = "separator" },
+            { name = "separator" },
 
-                        {
-                            name = " Rename",
-                            cmd = function()
-                                api.fs.rename(node())
-                            end,
-                            rtxt = "r",
-                        },
+            {
+              name = " Rename",
+              cmd = function()
+                api.fs.rename(node())
+              end,
+              rtxt = "r",
+            },
 
-                        {
-                            name = " Trash",
-                            cmd = function()
-                                api.fs.trash(node())
-                            end,
-                            rtxt = "D",
-                        },
+            {
+              name = " Trash",
+              cmd = function()
+                api.fs.trash(node())
+              end,
+              rtxt = "D",
+            },
 
-                        {
-                            name = " Delete",
-                            hl = "ExRed",
-                            cmd = function()
-                                api.fs.remove(node())
-                            end,
-                            rtxt = "d",
-                        },
-                    },
-                }
+            {
+              name = " Delete",
+              hl = "ExRed",
+              cmd = function()
+                api.fs.remove(node())
+              end,
+              rtxt = "d",
+            },
+          },
+        }
 
                 local buf = vim.api.nvim_win_get_buf(vim.fn.getmousepos().winid)
                 local options = vim.bo[buf].ft == "NvimTree" and main_menu.tree or main_menu.main

@@ -30,6 +30,7 @@ return {
             },
         },
     },
+    keys = require("config.keys").nvim_tree,
     opts = {
         update_focused_file = {
             enable = true,
@@ -70,6 +71,16 @@ return {
                     none = " ",
                 },
             },
+            icons = {
+                git_placement = "signcolumn",
+                show = {
+                    file = true,
+                    folder = false,
+                    folder_arrow = true,
+                    git = true,
+                },
+            },
+
         },
         actions = {
             open_file = {
@@ -91,36 +102,27 @@ return {
         local function open_nvim_tree_with_empty_buffer(data)
             -- buffer is a directory
             local directory = vim.fn.isdirectory(data.file) == 1
-            
             if not directory then
                 return
             end
-            
             -- Change to the directory
             vim.cmd.cd(data.file)
-            
             -- Open an empty buffer first
             vim.cmd("enew")
-            
             -- Open the tree in a split 
             require("nvim-tree.api").tree.open()
-            
             -- Focus back to the empty buffer
             vim.cmd("wincmd p")
         end
-        
         vim.api.nvim_create_autocmd({ "VimEnter" }, {
             callback = open_nvim_tree_with_empty_buffer,
         })
     end,
     config = function(_, opts)
         local nvimtree = require("nvim-tree")
-        
         -- Explicitly set the tree to open on the left
         opts.view.side = "left"
-        
         nvimtree.setup(opts)
-        
         -- For handling opening tree on empty buffers after startup
         local function open_tree_on_empty_buffer()
             local buf_name = vim.api.nvim_buf_get_name(0)
@@ -138,11 +140,27 @@ return {
                 vim.cmd("wincmd l")
             end
         end
-        
         vim.api.nvim_create_autocmd("BufEnter", {
             group = vim.api.nvim_create_augroup("nvim-tree-empty", { clear = true }),
             callback = open_tree_on_empty_buffer,
             nested = true,
         })
+
+
+        local function setup_highlights()
+            local current_hl = vim.api.nvim_get_hl(0, { name = "NvimTreeOpenedFolderName" })
+            local new_hl = vim.deepcopy(current_hl)
+            new_hl.bold = false
+            vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", new_hl)
+        end
+
+        setup_highlights()
+        vim.api.nvim_create_autocmd("ColorScheme", {
+            pattern = "*",
+            callback = function()
+                vim.defer_fn(setup_highlights, 100)
+            end,
+        })
+
     end,
 }
