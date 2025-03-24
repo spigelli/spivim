@@ -38,9 +38,12 @@ return {
             update_root = false,
         },
         view = {
-            width = 30,
+            width = {
+                min = 30,
+                max = 50,
+            },
             preserve_window_proportions = true,
-            signcolumn = "no",
+            signcolumn = "yes",
             side = "left",
             float = {
                 enable = false,
@@ -72,15 +75,60 @@ return {
                 },
             },
             icons = {
-                git_placement = "signcolumn",
+                web_devicons = {
+                    file = {
+                    enable = true,
+                    color = true,
+                    },
+                    folder = {
+                    enable = false,
+                    color = true,
+                    },
+                },
+                git_placement = "before",
+                modified_placement = "after",
+                hidden_placement = "after",
+                diagnostics_placement = "after",
+                bookmarks_placement = "after",
+                padding = "  ",
+                symlink_arrow = " ➛ ",
                 show = {
                     file = true,
                     folder = false,
                     folder_arrow = true,
                     git = true,
+                    modified = true,
+                    hidden = false,
+                    diagnostics = true,
+                    bookmarks = true,
+                },
+                glyphs = {
+                    default = "",
+                    symlink = "",
+                    bookmark = "󰆤",
+                    modified = "●",
+                    hidden = "󰜌",
+                    folder = {
+                    arrow_closed = "",
+                    arrow_open = "",
+                    default = "",
+                    open = "",
+                    empty = "",
+                    empty_open = "",
+                    symlink = "",
+                    symlink_open = "",
+                    },
+                    git = {
+                    unstaged = "✗",
+                    staged = "✓",
+                    unmerged = "",
+                    renamed = "➜",
+                    untracked = "★",
+                    deleted = "",
+                    ignored = "◌",
+                    },
                 },
             },
-
         },
         actions = {
             open_file = {
@@ -162,5 +210,12 @@ return {
             end,
         })
 
+        -- Also set up an autocmd to ensure foldcolumn is set if the on_attach doesn't catch it
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "NvimTree",
+            callback = function ()
+                vim.wo.foldcolumn = "2"
+            end,
+        })
     end,
 }
