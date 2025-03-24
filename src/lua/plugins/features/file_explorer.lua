@@ -1,100 +1,148 @@
--- local keymaps = _G.keymaps
-
 return {
-  "nvim-neo-tree/neo-tree.nvim",
-  cmd = "Neotree",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-    "MunifTanjim/nui.nvim",
-  },
-  keys = require("config.keys").neotree,
-  deactivate = function()
-    vim.cmd([[Neotree close]])
-  end,
-  init = function()
-    -- FIX: use `autocmd` for lazy-loading neo-tree instead of directly requiring it,
-    -- because `cwd` is not set up properly.
-    vim.api.nvim_create_autocmd("BufEnter", {
-      group = vim.api.nvim_create_augroup("Neotree_start_directory", { clear = true }),
-      desc = "Start Neo-tree with directory",
-      once = true,
-      callback = function()
-        if package.loaded["neo-tree"] then
-          return
-        else
-          local stats = vim.uv.fs_stat(vim.fn.argv(0))
-          if stats and stats.type == "directory" then
-            require("neo-tree")
-          end
+    "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeFocus" },
+    dependencies = {
+        "nvim-tree/nvim-web-devicons",
+        opts = {
+            override_by_filename = {
+                [".gitignore"] = {
+                    icon = "",
+                    color = "#f1502f",
+                    name = "Gitignore",
+                },
+                ["exe"] = {
+                    icon = "",
+                    color = "#7aa2f7",
+                    name = "Exe",
+                },
+                ["readme"] = {
+                    icon = "",
+                    color = "#ededed",
+                    cterm_color = "255",
+                    name = "Readme",
+                },
+                ["readme.md"] = {
+                    icon = "",
+                    color = "#ededed",
+                    cterm_color = "255",
+                    name = "Readme",
+                },
+            },
+        },
+    },
+    opts = {
+        update_focused_file = {
+            enable = true,
+            update_cwd = true,
+            update_root = false,
+        },
+        view = {
+            width = 30,
+            preserve_window_proportions = true,
+            signcolumn = "no",
+            side = "left",
+            float = {
+                enable = false,
+                quit_on_focus_loss = false,
+                open_win_config = {
+                    relative = "editor",
+                    border = "rounded",
+                    width = 30,
+                    height = 30,
+                    row = 2,
+                    col = 1,
+                },
+            },
+        },
+        filesystem_watchers = {
+            enable = true,
+        },
+        renderer = {
+            root_folder_label = ":t",
+            indent_markers = {
+                enable = true,
+                inline_arrows = true,
+                icons = {
+                    corner = "└",
+                    edge = "│",
+                    item = "│",
+                    bottom = "─",
+                    none = " ",
+                },
+            },
+        },
+        actions = {
+            open_file = {
+                resize_window = true,
+                window_picker = {
+                    enable = false,
+                },
+            },
+        },
+        disable_netrw = true,
+        hijack_netrw = true,
+        hijack_cursor = true,
+        auto_reload_on_write = true,
+        hijack_unnamed_buffer_when_opening = false,
+        sync_root_with_cwd = true,
+    },
+    init = function()
+        -- This ensures nvim-tree loads early when starting with a directory
+        local function open_nvim_tree_with_empty_buffer(data)
+            -- buffer is a directory
+            local directory = vim.fn.isdirectory(data.file) == 1
+            
+            if not directory then
+                return
+            end
+            
+            -- Change to the directory
+            vim.cmd.cd(data.file)
+            
+            -- Open an empty buffer first
+            vim.cmd("enew")
+            
+            -- Open the tree in a split 
+            require("nvim-tree.api").tree.open()
+            
+            -- Focus back to the empty buffer
+            vim.cmd("wincmd p")
         end
-      end,
-    })
-  end,
-  opts = {
-    sources = { "filesystem", "buffers", "git_status" },
-    open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
-    filesystem = {
-      bind_to_cwd = false,
-      follow_current_file = { enabled = true },
-      use_libuv_file_watcher = true,
-    },
-    window = {
-      mappings = {
-        ["l"] = "open",
-        ["h"] = "close_node",
-        ["<space>"] = "none",
-        ["Y"] = {
-          function(state)
-            local node = state.tree:get_node()
-            local path = node:get_id()
-            vim.fn.setreg("+", path, "c")
-          end,
-          desc = "Copy Path to Clipboard",
-        },
-        ["O"] = {
-          function(state)
-            require("lazy.util").open(state.tree:get_node().path, { system = true })
-          end,
-          desc = "Open with System Application",
-        },
-        ["P"] = { "toggle_preview", config = { use_float = false } },
-      },
-    },
-    default_component_configs = {
-      indent = {
-        with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
-        expander_collapsed = "",
-        expander_expanded = "",
-        expander_highlight = "NeoTreeExpander",
-      },
-      git_status = {
-        symbols = {
-          unstaged = "󰄱",
-          staged = "󰱒",
-        },
-      },
-    },
-  },
-  config = function(_, opts)
-    local function on_move(data)
-      Snacks.rename.on_rename_file(data.source, data.destination)
-    end
-
-    local events = require("neo-tree.events")
-    opts.event_handlers = opts.event_handlers or {}
-    vim.list_extend(opts.event_handlers, {
-      { event = events.FILE_MOVED, handler = on_move },
-      { event = events.FILE_RENAMED, handler = on_move },
-    })
-    require("neo-tree").setup(opts)
-    vim.api.nvim_create_autocmd("TermClose", {
-      pattern = "*lazygit",
-      callback = function()
-        if package.loaded["neo-tree.sources.git_status"] then
-          require("neo-tree.sources.git_status").refresh()
+        
+        vim.api.nvim_create_autocmd({ "VimEnter" }, {
+            callback = open_nvim_tree_with_empty_buffer,
+        })
+    end,
+    config = function(_, opts)
+        local nvimtree = require("nvim-tree")
+        
+        -- Explicitly set the tree to open on the left
+        opts.view.side = "left"
+        
+        nvimtree.setup(opts)
+        
+        -- For handling opening tree on empty buffers after startup
+        local function open_tree_on_empty_buffer()
+            local buf_name = vim.api.nvim_buf_get_name(0)
+            local is_no_name_buffer = buf_name == "" and vim.bo.filetype == "" and vim.bo.buftype == ""
+            
+            if is_no_name_buffer and #vim.api.nvim_list_wins() == 1 then
+                -- Create a vsplit with an empty buffer
+                vim.cmd("vsplit")
+                
+                -- Open tree in the left window
+                vim.cmd("wincmd h")
+                require("nvim-tree.api").tree.open()
+                
+                -- Move focus to the empty buffer on the right
+                vim.cmd("wincmd l")
+            end
         end
-      end,
-    })
-  end,
+        
+        vim.api.nvim_create_autocmd("BufEnter", {
+            group = vim.api.nvim_create_augroup("nvim-tree-empty", { clear = true }),
+            callback = open_tree_on_empty_buffer,
+            nested = true,
+        })
+    end,
 }
