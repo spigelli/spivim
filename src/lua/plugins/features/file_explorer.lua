@@ -3,6 +3,32 @@ return {
 	cmd = { "NvimTreeToggle", "NvimTreeFocus" },
 	dependencies = {
 		"nvim-tree/nvim-web-devicons",
+		opts = {
+			override_by_filename = {
+				[".gitignore"] = {
+					icon = "",
+					color = "#ededed",
+					name = "Gitignore",
+				},
+				["exe"] = {
+					icon = "",
+					color = "#7aa2f7",
+					name = "Exe",
+				},
+				["readme"] = {
+					icon = "",
+					color = "#ededed",
+					cterm_color = "255",
+					name = "Readme",
+				},
+				["readme.md"] = {
+					icon = "",
+					color = "#ededed",
+					cterm_color = "255",
+					name = "Readme",
+				},
+			},
+		},
 	},
 	keys = require("config.keys").nvim_tree,
 	opts = {

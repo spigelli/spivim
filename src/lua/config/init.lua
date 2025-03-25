@@ -1,14 +1,4 @@
-local LazyVim = require("lazy.util")
-
 local M = {}
-
-local load = function(mod)
-  if require("lazy.core.cache").find(mod)[1] then
-    LazyVim.try(function()
-      require(mod)
-    end, { msg = "Failed loading " .. mod })
-  end
-end
 
 -- Returns a new autocmd group with that will fire on the given event very lazily
 local _create_very_lazy_autocmd = function(event, callback)
@@ -20,45 +10,22 @@ local _create_very_lazy_autocmd = function(event, callback)
   })
 end
 
--- A simple map function to apply a function to each element of an array
-local _map = function(array, func)
-  local result = {}
-  for i, v in ipairs(array) do
-    result[i] = func(v)
-  end
-  return result
-end
-
--- Creates functions to call load on each module
-local _get_loaders = function()
-  local standard_modules = { "autocmds", "keymaps", "options" }
-  return unpack(
-    _map(
-      standard_modules,
-      function(mod)
-        return function()
-          load(mod)
-        end
-      end
-    )
-  )
-end
-
 M.setup = function(opts)
-  local load_autocmds, load_keymaps, load_options = _get_loaders()
-
+  local l = function(m) vim.notify(m, vim.log.levels.INFO) end
   -- Load autocmds immediately when opened with a file
-  local opened_with_file = vim.fn.argc(-1) ~= 0
-  if opened_with_file then
-    load_autocmds()
-  end
+  -- local opened_with_file = vim.fn.argc(-1) ~= 0
+  -- if opened_with_file then
+  --   require("config.autocmds")
+  -- end
 
+  l("Creating very lazy autocmd")
   _create_very_lazy_autocmd(
     "User",
     function()
+      l("User event triggered")
       -- Load the autocmds when the user is ready
-      if not opened_with_file then
-        load_autocmds()
+      if not false then
+        require("config.autocmds")
       end
 
       -- Load lazy.nvim defaults
@@ -73,8 +40,6 @@ M.setup = function(opts)
       end, { desc = "Load all plugins and run :checkhealth" })
     end
   )
-
-  load_options()
 
   -- Make sure to setup `mapleader` and `maplocalleader` before
   -- loading lazy.nvim so that mappings are correct.

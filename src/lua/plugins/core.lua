@@ -17,5 +17,5 @@ return {
     end,
   },
   { import = "plugins.languages" },
-  { import = "plugins.features" }
+  { import = "plugins.features" },
 }

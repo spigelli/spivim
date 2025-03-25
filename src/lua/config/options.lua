@@ -46,6 +46,7 @@ vim.g.root_spec = { "lsp", { ".git", "lua" }, "cwd" }
 -- * pwsh
 -- * powershell
 -- LazyVim.terminal.setup("pwsh")
+vim.o.shell = "/bin/zsh -i"
 
 -- Set LSP servers to be ignored when used with `util.root.detectors.lsp`
 -- for detecting the LSP root
@@ -120,15 +121,15 @@ opt.wildmode = "longest:full,full" -- Command-line completion mode
 opt.winminwidth = 5 -- Minimum window width
 opt.wrap = false -- Disable line wrap
 
-if vim.fn.has("nvim-0.10") == 1 then
-  opt.smoothscroll = true
-  opt.foldexpr = "v:lua.require'lazyvim.util'.ui.foldexpr()"
-  opt.foldmethod = "expr"
-  opt.foldtext = ""
-else
-  opt.foldmethod = "indent"
-  opt.foldtext = "v:lua.require'lazyvim.util'.ui.foldtext()"
-end
+-- New options
+opt.smoothscroll = true
+opt.foldexpr = "v:lua.require'lazyvim.util'.ui.foldexpr()"
+opt.foldmethod = "expr"
+opt.foldtext = ""
+opt.foldmethod = "indent"
+opt.foldtext = "v:lua.require'lazyvim.util'.ui.foldtext()"
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
+
+vim.api.nvim_set_keymap('n', '<leader>rr', ':cq<CR>', { noremap = true, silent = true })
