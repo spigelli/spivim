@@ -47,7 +47,7 @@ return {
 		---@type snacks.Config
 		opts = {
 			notifier = {
-				timeout = 3000, -- default timeout in ms
+				timeout = 10000, -- default timeout in ms
 				width = { min = 40, max = 0.4 },
 				height = { min = 1, max = 0.6 },
 				-- editor margin to keep free. tabline and statusline are taken into account automatically
