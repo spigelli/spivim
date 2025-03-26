@@ -69,6 +69,33 @@ function M.init()
 
   -- Load lazy.nvim
   setup_lazy_plugins()
+
+  vim.o.mousemoveevent = true
+
+  require("eagle").setup({
+    	show_headers = true,
+    	order = 1,
+    	improved_markdown = true,
+    	mouse_mode = true,
+    	keyboard_mode = false,
+    	logging = false,
+    	close_on_cmd = true,
+    	show_lsp_info = true,
+    	scrollbar_offset = 0,
+    	max_width_factor = 3.0,
+    	-- max_height_factor = 5.0,
+    	max_height_factor = 5.0,
+    	render_delay = 200,
+    	detect_idle_timer = 50,
+    	window_row = 1,
+    	window_col = -1,
+    	border = "rounded",
+    	title = "",
+    	title_pos = "left",
+    	title_color = "#8AAAE5",
+    	border_color = "#d2d2d2",
+    })
+
 end
 
 return M
