@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Reference documentation before answering
+You should always automatically reference the documentation under the folder `documentation` these are up-to-date neovim documentation help files. Make sure your answer contains no deprecated function calls

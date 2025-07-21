@@ -5,8 +5,19 @@ return {
     event = "VeryLazy",
     opts_extend = { "spec" },
     opts = {
-      preset = "helix",
-      defaults = {},
+      preset = "modern",
+      defaults = {
+        ["<leader>b"] = {
+          name = "Buffer",
+          ["o"] = { name = "Order by..." },
+          d = { name = "Directory" },
+          l = { name = "Language" },
+          n = { name = "Number" },
+          p = { name = "Pin" },
+          x = { name = "Close" },
+          X = { name = "Close Others" },
+        },
+      },
       spec = {
         {
           mode = { "n", "v" },
@@ -32,6 +43,7 @@ return {
             expand = function()
               return require("which-key.extras").expand.buf()
             end,
+            icon = { icon = "󰈙 ", color = "blue" },
           },
           {
             "<leader>w",

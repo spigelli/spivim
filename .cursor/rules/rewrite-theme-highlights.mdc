@@ -1,0 +1,1243 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+The following is documentation of the theme I use with `lazy.nvim` (`github-nvim-theme`):
+
+```
+*github-nvim-theme.txt*                                 Github's Neovim themes
+==============================================================================
+Table of Contents                        *github-nvim-theme-table-of-contents*
+  - Overview                                      |github-nvim-theme-overview|
+  - Usage                                            |github-nvim-theme-usage|
+  - Configuration                            |github-nvim-theme-configuration|
+  - Templates                                    |github-nvim-theme-templates|
+  - Option                                          |github-nvim-theme-option|
+  - Palette                                        |github-nvim-theme-palette|
+  - Spec                                              |github-nvim-theme-spec|
+  - Group                                            |github-nvim-theme-group|
+  - Modules                                        |github-nvim-theme-modules|
+  - Color                                            |github-nvim-theme-color|
+  - Compile                                        |github-nvim-theme-compile|
+  - Interactive                                |github-nvim-theme-interactive|
+OVERVIEW                                          *github-nvim-theme-overview*
+The Github Theme is a community-driven theme for Neovim, designed to support
+LSP (Language Server Protocol), Treesitter, and various plugins. It offers
+multiple themes, including colorblind-friendly options.
+Here are the available themes:
+  ---------------------------------------------------------------------------------------------
+  github-nvim-theme            github-vscode-theme   Github Web UI        Primer
+  ---------------------------- --------------------- -------------------- ---------------------
+  github_dark                  Github Dark           -                    -
+  github_light                 Github Light          -                    -
+  github_dark_dimmed           Github Dark Dimmed    Dark dimmed          dark_dimmed
+  github_dark_default          Github Dark Default   Dark default         dark
+  github_light_default         Github Light Default  Light default        light
+  github_dark_high_contrast    Github Dark High      Dark high contrast   dark_high_contrast
+                               Contrast                                   
+  github_light_high_contrast   Github Light High     Light high contrast  light_high_contrast
+                               Contrast                                   
+  github_dark_colorblind       Github Dark           Dark Protanopia &    dark_colorblind
+                               Colorblind (Beta)     Deuteranopia         
+  github_light_colorblind      Github Light          Light Protanopia &   light_colorblind
+                               Colorblind (Beta)     Deuteranopia         
+  github_dark_tritanopia       -                     Dark Tritanopia      dark_tritanopia
+  github_light_tritanopia      -                     Light Tritanopia     light_tritanopia
+  ---------------------------------------------------------------------------------------------
+USAGE                                                *github-nvim-theme-usage*
+The Github Theme is a colorscheme for Vim, and it can be used like any other
+colorscheme. To use the theme as is, simply set it using the `:colorscheme`
+command:
+>vim
+    :colorscheme github_dark
+<
+The Github Theme is highly customizable, and it provides four main components
+that can be customized: |github-nvim-theme-option|,
+|github-nvim-theme-palette|, |github-nvim-theme-spec|, and
+|github-nvim-theme-group|.
+
+CONFIGURATION                                *github-nvim-theme-configuration*
+The Github Theme allows you to set individual components separately instead of
+using the default `setup` function.
+
+SETUP ~
+The `setup()` function is used to configure the Github Theme by setting its
+options.
+>lua
+    require('github-theme').setup({
+      options = {
+        dim_inactive = true,
+      }
+    })
+<
+
+OVERRIDES ~
+The individual components, such as |github-nvim-theme-palettes|,
+|github-nvim-theme-specs|, and |github-nvim-theme-groups|, can be overridden
+separately to customize the theme according to your preferences.
+>lua
+    local override = require('github-theme.override')
+    override.palettes = {
+      github_dark = {
+        red = '#ff0000',
+      },
+      github_light = {
+        comment = '#636e7b',
+      },
+    }
+    override.specs = {
+      github_dark = {
+        syntax = {
+          keyword = 'magenta'
+        }
+      }
+    }
+    override.groups = {
+      all = {
+        IncSearch = { bg = 'palette.cyan' },
+      },
+    }
+<
+Overrides for |github-nvim-theme-palettes| and |github-nvim-theme-specs| are
+defined per style. The purpose of overriding these components is to change the
+colors used in specific styles. |github-nvim-theme-groups|, on the other hand,
+are not defined per style and primarily use the colors defined in the
+|github-nvim-theme-palette| and |github-nvim-theme-spec| objects to set values
+using |github-nvim-theme-templates|.
+
+SETUP ~
+The `setup` function in the Github Theme serves as a convenient wrapper for
+configuring the theme using the individual components. It accepts separate keys
+for each component and calls the appropriate initialization or override
+function.
+>lua
+    local options = {
+      dim_inactive = true,
+    }
+    local palettes = {
+      github_dark = {
+        red = '#ff0000',
+      },
+      github_light = {
+        comment = '#636e7b',
+      },
+    }
+    local specs = {
+      github_dark = {
+        syntax = {
+          keyword = 'magenta'
+        }
+      }
+    }
+    local groups = {
+      all = {
+        IncSearch = { bg = 'palette.cyan' },
+      },
+    }
+    require('github-theme').setup({
+      options = options,
+      palettes = palettes,
+      specs = specs,
+      groups = groups,
+    })
+<
+
+TEMPLATES                                        *github-nvim-theme-templates*
+Templates in the Github Theme allow you to reference other lower-level objects
+in the theme’s configuration. Instead of setting an absolute color value, you
+can refer to the value of a lower-level object. The foundation of the Github
+Theme is the |github-nvim-theme-palette|. A palette serves as the base for
+other components. |github-nvim-theme-palettes| are used as the template source
+for |github-nvim-theme-spec| objects, and |github-nvim-theme-spec| objects are
+used as the template source for |github-nvim-theme-group| objects.
+If a value does not start with the `#` symbol, it is treated as a template
+path. In Lua, everything is a table, so `palettes` and `specs` are Lua tables.
+A template path is composed of keys used to index into the table, separated by
+`.` characters.
+**Example:**
+>lua
+    -- Specs use palettes as the template source
+    local specs = {
+      github_dark = {
+        syntax = {
+          -- The value does not start with `#`, so it is treated as a template.
+          keyword = 'magenta',
+    
+          -- Adding either `.bright` or `.base` will change the value
+          conditional = 'magenta.bright',
+    
+          number = 'orange',
+        },
+        git = {
+          -- A color defined using `#` can also be used
+          changed = '#f4a261',
+        }
+      }
+    }
+    
+    -- Groups use specs as the template source
+    local groups = {
+      all = {
+        -- The template path is parsed as [`syntax`, `string`]. This is similar to calling into a Lua table, like:
+        -- `spec.syntax.string`.
+        String = { fg = 'syntax.string' },
+    
+        -- If `link` is defined, it will be applied over any other values defined
+        Whitespace = { link = 'Comment' }
+    
+        -- Specs are used as the template. Specs have their palettes as a field that can be accessed.
+        IncSearch = { bg = 'palette.cyan' },
+      },
+    }
+    
+    require('github-theme').setup({ specs = specs, groups = groups })
+<
+
+OPTION                                              *github-nvim-theme-option*
+
+options.compile_path {path}           *github-nvim-theme-options.compile_path*
+Specifies the output directory {path} where the compiled results will be
+written to. The default value is `vim.fn.stdpath("cache")/github-theme`.
+
+options.compile_file_suffix {suffix}*github-nvim-theme-options.compile_file_suffix*
+Specifies the string appended to the compiled file. Each `style` outputs to its
+own file, and these files will have the {suffix} appended at the end. The
+default value is `_compiled`.
+
+options.hide_end_of_buffer {bool}*github-nvim-theme-options.hide_end_of_buffer*
+When set to `true`, it changes the foreground color of the `EndOfBuffer`
+highlight group. This allows you to mimic the effect of hiding the end of the
+buffer by using the color of the colorscheme background. The default value is
+`true`.
+
+options.hide_nc_statusline {bool}*github-nvim-theme-options.hide_nc_statusline*
+When set to `true`, it hides the `StatusLineNC` highlight group and makes it
+minimal. The default value is `true`.
+
+options.transparent {bool}             *github-nvim-theme-options.transparent*
+If set to `true`, it disables setting the background of `Normal`, `NormalNC`,
+and other highlight groups. This allows you to use the colors of the
+colorscheme while using the background of your terminal. The default value is
+`false`.
+
+options.terminal_colors {bool}     *github-nvim-theme-options.terminal_colors*
+If set to `true`, it defines the terminal colors for the built-in `terminal`
+(vim.g.terminal_color_). The default value is `true`.
+
+options.dim_inactive {bool}           *github-nvim-theme-options.dim_inactive*
+If set to `true`, it sets the background of non-current windows to be darker.
+Refer to `:h hl-NormalNC` for more information.
+
+options.module_default {bool}       *github-nvim-theme-options.module_default*
+Specifies the default value of a module that has not been overridden in the
+modules table.
+
+options.styles {table}                      *github-nvim-theme-options.styles*
+The `styles` table contains a list of syntax components and their corresponding
+styles. These styles can be any combination of |highlight-args|. The available
+syntax components are:
+- comments
+- conditionals
+- constants
+- functions
+- keywords
+- numbers
+- operators
+- strings
+- types
+- variables
+Example:
+>lua
+    local options = {
+      styles = {
+        comments = 'italic',
+        functions = 'italic,bold',
+      }
+    }
+<
+
+options.inverse {table}                    *github-nvim-theme-options.inverse*
+The `inverse` table contains a list of highlight types. If a highlight type is
+enabled, it inverses the foreground and background colors instead of applying
+the normal highlight group. The available highlight types are: `match_paren`,
+`visual`, and `search`. For example, if `search` is enabled, it inverses the
+foreground and background colors for highlighted search terms.
+
+options.darken {table}                      *github-nvim-theme-options.darken*
+The `darken` table contains settings for buffer background color. Enabling
+`floats` allows floating windows to have a darkened background. The default
+value is `true`.
+Another setting is for sidebars, which is configured in the `sidebars`
+sub-table.
+
+options.darken.sidebars {table}    *github-nvim-theme-options.darken.sidebars*
+The `sidebars` sub table of `darken` contains settings for sidebar-like
+windows. It has two configurations: `enable` is used to assign a darker
+background to the listed windows, and `list` specifies the windows to be
+darkened.
+Example:
+>lua
+    local options = {
+      darken = {
+        floats = false,
+        sidebars = {
+          enable = true,
+          list = {'qf', 'netrw'} -- default is {}
+        }
+      }
+    }
+<
+
+options.modules {table}                    *github-nvim-theme-options.modules*
+`modules` store configuration information for various plugins and other neovim
+modules. A module can either be a boolean or a table that contains additional
+configuration for that module. If the value is a table it also has a field
+called `enable` that will tell github theme to load it. See
+|github-nvim-theme-modules| for more information.
+By default modules will be enabled. To change this behaviour change
+`options.module_default` to `false`.
+
+PALETTE                                            *github-nvim-theme-palette*
+A `palette` is the base color definitions of a style. Each style defines its
+own palette to be used by the other components. A palette defines base colors,
+as well as foreground and background shades. Along with the foreground and
+background colors a palette also defines other colors such as selection and
+comment colors.
+The base colors are shade table that define a `base`, `bright` color. These
+base colors are: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`,
+`white`, `pink`.
+  Key       Description
+  --------- ----------------------------------------
+  black     Shade Table (Base, Bright)
+  red       Shade Table (Base, Bright)
+  green     Shade Table (Base, Bright)
+  yellow    Shade Table (Base, Bright)
+  blue      Shade Table (Base, Bright)
+  magenta   Shade Table (Base, Bright)
+  cyan      Shade Table (Base, Bright)
+  white     Shade Table (Base, Bright)
+  orange    Orange Color
+  pink      Shade Table (Base, Bright)
+  comment   Comment color
+  bg0       Darker bg (status line and float)
+  bg1       Default bg
+  bg2       Lighter bg (colorcolumn folds)
+  bg3       Lighter bg (cursor line)
+  bg4       Lighter bg (Conceal)
+  fg0       Lighter fg
+  fg1       Default fg
+  fg2       Darker fg (status line)
+  fg3       Darker fg (line numbers, fold columns)
+  sel0      visual selection bg
+  sel1      Popup sel bg
+  sel2      search bg
+SPEC                                                  *github-nvim-theme-spec*
+A `spec` or specification is a mapping of a palette values to a logical group
+that is used by the |github-nvim-theme-group|.
+The base of a `spec` is a re-export of the |github-nvim-theme-palette|’s `fg`
+`bg` and `sel`. The values that are re-exported are: `bg0`, `bg1`, `bg2`,
+`bg3`, `bg4`, `fg0`, `fg1`, `fg2`, `fg3`, `sel0`, `sel1`, `sel2`.
+
+spec.syntax                                    *github-nvim-theme-spec.syntax*
+The `syntax` table maps |github-nvim-theme-palette| color values to syntax
+values to be used by the |github-nvim-theme-group|.
+  Key           Description
+  ------------- ---------------------------------
+  bracket       Brackets and Punctuation
+  builtin0      Builtin variable
+  builtin1      Builtin type
+  builtin2      Builtin const
+  comment       Comment
+  conditional   Conditional and loop
+  const         Constants, imports and booleans
+  dep           Deprecated
+  field         Field
+  func          Functions and Titles
+  ident         Identifiers
+  keyword       Keywords
+  number        Numbers
+  operator      Operators
+  preproc       PreProc
+  regex         Regex
+  statement     Statements
+  string        Strings
+  type          Types
+  variable      Variables
+spec.diag                                        *github-nvim-theme-spec.diag*
+The `diag` table maps |github-nvim-theme-palette| colors to vim diagnostic
+colors values. These values are: `error`, `warn`, `info` and `hint`.
+
+spec.diag_bg                                  *github-nvim-theme-spec.diag_bg*
+The `diag_bg` table maps |github-nvim-theme-palette| colors to vim diagnostic
+background colors. These values are: `error`, `warn`, `info` and `hint`.
+
+spec.diff                                        *github-nvim-theme-spec.diff*
+The `diff` table maps |github-nvim-theme-palette| colors to vimdiff highlight
+colors. These values are: `add`, `delete`, `change` and `text`.
+
+spec.git                                          *github-nvim-theme-spec.git*
+The `git` table maps |github-nvim-theme-palette| colors to git colors. These
+values are: `add`, `removed`, `changed`, `conflict`, and `ignored`.
+
+GROUP                                                *github-nvim-theme-group*
+A `group` is the definition of a `highlight-group`. The key of the group table
+is the `highlight-group` that will be defined, and the table value is the
+arguments to the |:highlight| command.
+  -----------------------------------------------------------------------------------
+  Key     Help                Description
+  ------- ------------------- -------------------------------------------------------
+  fg      |highlight-guifg|   The color value of the foreground of the highlight
+                              group
+  bg      |highlight-guibg|   The color value of the background of the highlight
+                              group
+  sp      |highlight-guisp|   The color for underlines and undercurls
+  blend   |highlight-blend|   Override the blend level for a highlight group within
+                              the popupmenu or floating windows.
+  style   |highlight-gui|     The style of the highlight group. Ex italic, bold, etc
+  link    |highlight-link|    Link one highlight-group to another
+  -----------------------------------------------------------------------------------
+If the value of `link` is present and is not empty, github theme will link the
+group to the corresponding value.
+
+MODULES                                            *github-nvim-theme-modules*
+Modules are a way to adding extra information for various plugins or features.
+This also allows them to be enabled or disabled. There are two types of
+modules, `base` modules and `extended` modules. A `base` modules do not have
+any other information and are just a `boolean` denoting if it is enabled. An
+`extended` module is a module that has extra customization information. It is a
+table that contains the additional configuration as well as a field called
+`enable` to determine if the module is applied.
+Current list of modules are:
+- cmp
+- coc
+- dapui
+- dashboard
+- diagnostic
+- diffchar
+- fidget
+- fzf
+- gitgutter
+- gitsigns
+- indent_blankline
+- lsp_trouble
+- mini
+- native_lsp
+- neogit
+- neotree
+- notify
+- nvimtree
+- telescope
+- treesitter
+- treesitter_context
+- whichkey
+
+NEOVIM SPECIFIC MODULES ~
+The following modules are enabled by default only when on neovim, `diagnostic`,
+`native_lsp`, `treesitter`. These modules are part of the core neovim
+experience and are linked to by other modules. This also means that they will
+still be enabled when setting `module_default` to `false`.
+
+EXTENDED MODULES ~
+
+modules.coc                                    *github-nvim-theme-modules.coc*
+This module sets highlight groups from `neoclide/coc.nvim`.
+  key          type      default   description
+  ------------ --------- --------- -----------------------------------
+  enable       boolean   true      Enable the module to be included
+  background   boolean   true      Set virtual text background color
+modules.diagnostic                      *github-nvim-theme-modules.diagnostic*
+This module sets highlight groups from `vim.diagnostic`.
+  key          type      default   description
+  ------------ --------- --------- -----------------------------------
+  enable       boolean   true      Enable the module to be included
+  background   boolean   true      Set virtual text background color
+modules.native_lsp                      *github-nvim-theme-modules.native_lsp*
+This module sets highlight groups from neovim’s builtin `lsp`.
+  key          type      default   description
+  ------------ --------- --------- -----------------------------------
+  enable       boolean   true      Enable the module to be included
+  background   boolean   true      Set virtual text background color
+COLOR                                                *github-nvim-theme-color*
+Github Theme exposes a color utility library to help with manipulating colors.
+This library can be required using the following module:
+>lua
+    local Color = require('github-theme.lib.color')
+<
+
+color.from_hex({hex})                     *github-nvim-theme-color.from_hex()*
+Create a `Color` object from either a {hex} number or a `css-style` hex string
+(`"#RRGGBB[AA]"`).
+
+color.from_rgba({red}, {green}, {blue}, {alpha})*github-nvim-theme-color.from_rgba()*
+Create a `Color` object from a `RGBA` value. The {red}, {green} and {blue}
+components ranging from `[0,255]`. {alpha} is optional and defaults to `1`. The
+{alpha} value’s is from `[0,1]`.
+
+color.from_hsv({hue}, {sat}, {value}, {alpha})*github-nvim-theme-color.from_hsv()*
+Create a `Color` object from a `HSV` value. The {hue} is a float ranging
+`[0,360]`. {sat} and {value} are floats ranging from `[0,100]`. {alpha} is
+optional and defaults to `1`. The {alpha} value’s is from `[0,1]`.
+
+color.from_hsl({hue}, {sat}, {lightness}, {alpha})*github-nvim-theme-color.from_hsl()*
+Create a `Color` object from a `HSL` value. The {hue} is a float ranging
+`[0,360]`. {sat} and {lightness} are floats ranging from `[0,100]`. {alpha} is
+optional and defaults to `1`. The {alpha} value’s is from `[0,1]`.
+
+color:to_hex({with_alpha})                  *github-nvim-theme-color:to_hex()*
+Convert a `Color` object to a integer number. If {with_alpha} is true the hex
+value will be returned with the alpha value added. This is defaulted to
+`false`.
+
+color:to_css({with_alpha})                  *github-nvim-theme-color:to_css()*
+Convert a `Color` object to a `css_style` string (`"#RRGGBB[AA]"`). If
+{with_alpha} is true the hex value will be returned with the alpha value added.
+This is defaulted to `false`.
+
+color:to_rgba()                            *github-nvim-theme-color:to_rgba()*
+Convert a `Color` object to a `RGBA` table. The resulting table will have
+`red`, `green`, `blue` and `alpha` components as keys of the table.
+
+color:to_hsv()                              *github-nvim-theme-color:to_hsv()*
+Convert a `Color` object to a `HSV` table. The resulting table will have `hue`,
+`saturation` and `value` components as keys of the table.
+
+color:to_hsl()                              *github-nvim-theme-color:to_hsl()*
+Convert a `Color` object to a `HSL` table. The resulting table will have `hue`,
+`saturation` and `lightness` components as keys of the table.
+
+color:blend({other}, {factor})               *github-nvim-theme-color:blend()*
+Returns a new `Color` that is a linear blend between two colors. {other} is the
+other color to blend. {factor} is the percentage of the {other} color that will
+be blended. This percentage is represented `[0,1]` where `0` is no color
+blending and `1` is entirely the {other} color.
+
+color:shade({factor})                        *github-nvim-theme-color:shade()*
+Returns a new `Color` that has been `shaded` by the {factor}. The factor is a
+percentage from `[-1,1]` where `-1` is black and `1` is white.
+
+color:brighten({value})                   *github-nvim-theme-color:brighten()*
+Returns a new `Color` with {value} added to the `value` (`hsv`) of the current
+color. This returns a lighter version of of the current color if {value} is
+positive and a darker color is {value} is negative. {value} is Float [-100,
+100].
+
+color:lighten({value})                     *github-nvim-theme-color:lighten()*
+Returns a new `Color` with {value} added to the `lightness` (`hsl`) of the
+current color. This returns a lighter version of of the current color if
+{value} is positive and a darker color is {value} is negative. {value} is Float
+[-100, 100].
+
+color:saturate({value})                   *github-nvim-theme-color:saturate()*
+Returns a new `Color` with {value} added to the `saturation` (`hsv`) of the
+current color. This returns either a more or less saturated version depending
+of +/- v. {value} is Float [-100, 100].
+
+color:rotate({value})                       *github-nvim-theme-color:rotate()*
+Returns a new `Color` with {value} added to the `hue` (`hsv`) of the current
+color. The resulting value of `hue` will be wrapped from `[0,360]`, meaning
+that if the value exceeds `360` it will be wrapped back to `0`.
+
+COMPILE                                            *github-nvim-theme-compile*
+Github Theme is a highly customizable and configurable colorscheme. This does
+however come at the cost of complexity and execution time.
+Github Theme pre-computes the result of your configuration and saves the lua
+bytecode in a cache to be used on next load. This significantly speeds up
+github theme’s execution time. Changes to your configuration will be
+re-computed and cached automatically.
+By default Github Theme writes the compiled results into the system’s `cache`
+directory. On unix this is `$XDG_CACHE_HOME/nvim/github-theme` and on windows
+this is `%localappdata%\\Temp\\nvim\\github-theme`.
+
+COMPILE COMMANDS ~
+
+compile()                                        *github-nvim-theme-compile()*
+Compile github theme settings for each `style` and write compiled file to
+|github-nvim-theme-compile_path|.
+
+:GithubThemeCompile                    *github-nvim-theme-:GithubThemeCompile*
+Compile github theme settings for each `style` and write compiled file to
+|github-nvim-theme-compile_path|.
+
+INTERACTIVE                                    *github-nvim-theme-interactive*
+Github Theme makes it easy to make changes to its config and see the results.
+For this Github Theme exposes the command:
+>
+    GithubThemeInteractive
+<
+This command will attach an autocmd to the current buffer that executes on
+`BufferWritePost`. The autocmd will clear Github theme’s internal state and
+re-source it’s config from the newly saved file. It will then reset the
+colorscheme.
+There are a few things to note:
+- This requires executing `luafile` on the current file. Any syntax errors will throw errors.
+- If you are using packer and have Github theme’s config in a `config = function() end` block, this will not work as packer
+    would require to be re-compiled and the compiled file sourced.
+
+:GithubThemeInteractive            *github-nvim-theme-:GithubThemeInteractive*
+Enable Github Theme configuration reloading on buffer save.
+Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
+vim:tw=78:ts=8:noet:ft=help:norl:
+```
+
+I only really use `github_dark_default` as my color scheme, so you only need to worry about that but here's some context from the code:
+
+palette:
+```lua
+local C = require('github-theme.lib.color')
+
+local meta = {
+  name = 'github_dark_default',
+  light = false,
+}
+
+local primitives = require('github-theme.palette.primitives.dark')
+
+local pl = primitives.prettylights
+local scale = primitives.scale
+
+C.WHITE = C(scale.white)
+C.BLACK = C(scale.black)
+C.BG = C(assert(primitives.canvas.default))
+local BG = C(assert(primitives.canvas.default))
+
+local palette = {
+  scale = scale,
+
+  orange = scale.orange[4],
+
+  black = { base = scale.gray[10], bright = scale.gray[9] },
+  gray = { base = scale.gray[5], bright = scale.gray[5] },
+  blue = { base = scale.blue[4], bright = scale.blue[3] },
+  green = { base = scale.green[4], bright = scale.green[3] },
+  magenta = { base = scale.purple[4], bright = scale.purple[3] },
+  pink = { base = scale.pink[4], bright = scale.pink[3] },
+  red = { base = scale.red[4], bright = scale.red[3] },
+  white = { base = scale.gray[3], bright = scale.gray[3] },
+  yellow = { base = scale.yellow[4], bright = scale.yellow[3] },
+  cyan = { base = '#76e3ea', bright = '#b3f0ff' },
+
+  fg = {
+    default = '#e6edf3',
+    muted = '#7d8590',
+    subtle = scale.gray[5],
+    on_emphasis = scale.white,
+  },
+
+  canvas = primitives.canvas,
+
+  border = {
+    default = scale.gray[9],
+    muted = scale.gray[8],
+    subtle = BG:blend(C.from_rgba(240, 246, 252, 1), 0.1):to_css(),
+  },
+
+  neutral = {
+    emphasis_plus = scale.gray[5],
+    emphasis = scale.gray[5],
+    muted = BG:blend(C.from_rgba(110, 118, 129, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(110, 118, 129, 1), 0.1):to_css(),
+  },
+
+  accent = {
+    fg = '#2f81f7',
+    emphasis = scale.blue[6],
+    muted = BG:blend(C.from_rgba(56, 139, 253, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(56, 139, 253, 1), 0.15):to_css(),
+  },
+
+  success = {
+    fg = scale.green[4],
+    emphasis = scale.green[6],
+    muted = BG:blend(C.from_rgba(46, 160, 67, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(46, 160, 67, 1), 0.15):to_css(),
+  },
+
+  attention = {
+    fg = scale.yellow[4],
+    emphasis = scale.yellow[6],
+    muted = BG:blend(C.from_rgba(187, 128, 9, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(187, 128, 9, 1), 0.15):to_css(),
+  },
+
+  severe = {
+    fg = scale.orange[5],
+    emphasis = scale.orange[6],
+    muted = BG:blend(C.from_rgba(219, 109, 40, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(219, 109, 40, 1), 0.1):to_css(),
+  },
+
+  danger = {
+    fg = scale.red[5],
+    emphasis = scale.red[6],
+    muted = BG:blend(C.from_rgba(248, 81, 73, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(248, 81, 73, 1), 0.1):to_css(),
+  },
+
+  open = {
+    fg = scale.green[4],
+    emphasis = scale.green[6],
+    muted = BG:blend(C.from_rgba(46, 160, 67, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(46, 160, 67, 1), 0.15):to_css(),
+  },
+
+  done = {
+    fg = scale.purple[5],
+    emphasis = scale.purple[6],
+    muted = BG:blend(C.from_rgba(163, 113, 247, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(163, 113, 247, 1), 0.1):to_css(),
+  },
+
+  closed = {
+    fg = scale.red[5],
+    emphasis = scale.red[6],
+    muted = BG:blend(C.from_rgba(248, 81, 73, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(248, 81, 73, 1), 0.15):to_css(),
+  },
+
+  sponsors = {
+    fg = scale.pink[5],
+    emphasis = scale.pink[6],
+    muted = BG:blend(C.from_rgba(219, 97, 162, 1), 0.4):to_css(),
+    subtle = BG:blend(C.from_rgba(219, 97, 162, 1), 0.1):to_css(),
+  },
+}
+
+local function generate_spec(pal)
+  -- stylua: ignore start
+  local spec = {
+    bg0  = BG:blend(C(pal.canvas.inset), 0.75):to_css(),         -- Dark bg (popup and float)
+    bg1  = pal.canvas.default,                          -- Default bg
+    bg2  = BG:blend(C(pal.neutral.emphasis), 0.1):to_css(),      -- Lighter bg (colorcolumn Folds)
+    bg3  = pal.scale.gray[6],                           -- Lighter bg (cursor line)
+    bg4  = pal.scale.gray[4],                           -- Conceal
+
+    fg0  = pal.fg.subtle,                               -- Lighter fg
+    fg1  = pal.fg.default,                              -- Default fg
+    fg2  = pal.fg.muted,                                -- Darker fg (status line)
+    fg3  = pal.scale.gray[5],                           -- Darker fg (line numbers, fold columns)
+
+    sel0 = BG:blend(C(pal.accent.fg), 0.30):to_css(),            -- Visual selection bg
+    sel1 = BG:blend(C(pal.accent.muted), 0.90):to_css(),         -- Popup sel bg
+    sel2 = BG:blend(C(pal.scale.yellow[1]), 0.20):to_css(),      -- Search bg
+  }
+
+  spec.syntax = {
+    bracket     = spec.fg1,                             -- Brackets and Punctuation
+    builtin0    = pl.syntax.constant,                   -- Builtin variable
+    builtin1    = pl.syntax.keyword,                    -- Builtin type
+    builtin2    = pl.syntax.constant,                   -- Builtin const
+    comment     = pl.syntax.comment,                    -- Comment
+    conditional = pl.syntax.keyword,                    -- Conditional and loop
+    const       = pl.syntax.constant,                   -- Constants, imports and booleans
+    dep         = pal.scale.red[3],                     -- Deprecated
+    field       = pl.syntax.constant,                   -- Field
+    func        = pl.syntax.entity,                     -- Functions and Titles
+    ident       = spec.fg1,                             -- Identifiers
+    keyword     = pl.syntax.keyword,                    -- Keywords
+    number      = pl.syntax.constant,                   -- Numbers
+    operator    = pl.syntax.constant,                   -- Operators
+    param       = spec.fg1,                             -- Parameters
+    preproc     = pl.syntax.keyword,                    -- PreProc
+    regex       = pl.syntax.string,                     -- Regex
+    statement   = pl.syntax.keyword,                    -- Statements
+    string      = pl.syntax.string,                     -- Strings
+    type        = pl.syntax.variable,                   -- Types
+    tag         = pl.syntax.entityTag,                  -- Tags
+    variable    = spec.fg1,                             -- Variables
+  }
+
+  spec.diag = {
+    error = pal.danger.fg,
+    warn  = pal.attention.fg,
+    info  = pal.accent.fg,
+    hint  = pal.fg.muted,
+  }
+
+  spec.diag_bg = {
+    error = BG:blend(C(spec.diag.error), 0.15):to_css(),
+    warn  = BG:blend(C(spec.diag.warn), 0.15):to_css(),
+    info  = BG:blend(C(spec.diag.info), 0.15):to_css(),
+    hint  = BG:blend(C(spec.diag.hint), 0.15):to_css(),
+  }
+
+  spec.diff = {
+    add    = BG:blend(C(pal.scale.green[6]), 0.15):to_css(),
+    delete = BG:blend(C(pal.scale.red[6]), 0.15):to_css(),
+    change = BG:blend(C(pal.scale.yellow[6]), 0.15):to_css(),
+    text   = spec.fg0
+  }
+
+  spec.git = {
+    add      = pal.success.fg,
+    removed  = pal.danger.fg,
+    changed  = pal.attention.fg,
+    conflict = pal.severe.fg,
+    ignored  = pal.fg.subtle,
+  }
+
+  -- stylua: ignore end
+  return spec
+end
+
+return {
+  meta = meta,
+  primitives = primitives,
+  palette = palette,
+  generate_spec = generate_spec,
+}
+```
+
+group styles:
+```lua
+local collect = require('github-theme.lib.collect')
+local template = require('github-theme.util.template')
+local override = require('github-theme.override')
+local M = {}
+
+---A string whose contents is a comma-separated list of styles.
+---
+---## Examples
+---```lua
+---group.style = "bold,italic,underline"
+---group.style = "NONE"
+---```
+---@alias GhTheme.HighlightGroup.Style
+---| "NONE"
+---| "bold"
+---| "standout"
+---| "underline"
+---| "undercurl"
+---| "underdouble"
+---| "underdotted"
+---| "underdashed"
+---| "strikethrough"
+---| "italic"
+---| "reverse"
+---| "nocombine"
+---| string
+
+---A Neovim highlight-group definition.
+---@class (exact) GhTheme.HighlightGroup
+---@field fg? GhTheme.Color.CSSHexString
+---@field bg? GhTheme.Color.CSSHexString
+---@field sp? GhTheme.Color.CSSHexString
+---@field style? GhTheme.HighlightGroup.Style
+---@field blend? integer
+---@field nocombine? boolean
+---@field link? string
+---@field force? boolean
+
+---@param spec GhTheme.Spec
+---@return table<string, GhTheme.HighlightGroup>
+function M.from(spec)
+  local config = require('github-theme.config').options
+
+  if not spec then
+    print('there is no spec')
+  end
+  local editor = require('github-theme.group.editor').get(spec, config)
+  local syntax = require('github-theme.group.syntax').get(spec, config)
+
+  local res = collect.deep_extend(editor, syntax)
+
+  local default_enable_value = config.module_default
+  local mod_names = require('github-theme.config').module_names
+  for _, name in ipairs(mod_names) do
+    local kind = type(config.modules[name])
+    local opts = kind == 'boolean' and { enable = config.modules[name] }
+      or kind == 'table' and config.modules[name]
+      or {}
+    opts.enable = opts.enable == nil and default_enable_value or opts.enable
+
+    if opts.enable then
+      res = collect.deep_extend(
+        res,
+        require('github-theme.group.modules.' .. name).get(spec, config, opts)
+      )
+    end
+  end
+
+  local ovr = override.groups
+
+  if ovr.all then
+    override.extend_groups(res, template.parse(ovr.all, spec), {})
+  end
+
+  if ovr[spec.palette.meta.name] then
+    override.extend_groups(res, template.parse(ovr[spec.palette.meta.name], spec), {})
+  end
+
+  return res
+end
+
+---@param theme? GhTheme.Theme
+---@return table<string, GhTheme.HighlightGroup>
+function M.load(theme)
+  theme = theme or require('github-theme.config').theme
+  return M.from(require('github-theme.spec').load(theme))
+end
+
+return M
+```
+
+Group Definitions:
+
+edito:
+```lua
+local collect = require('github-theme.lib.collect')
+local template = require('github-theme.util.template')
+local override = require('github-theme.override')
+local M = {}
+
+---A string whose contents is a comma-separated list of styles.
+---
+---## Examples
+---```lua
+---group.style = "bold,italic,underline"
+---group.style = "NONE"
+---```
+---@alias GhTheme.HighlightGroup.Style
+---| "NONE"
+---| "bold"
+---| "standout"
+---| "underline"
+---| "undercurl"
+---| "underdouble"
+---| "underdotted"
+---| "underdashed"
+---| "strikethrough"
+---| "italic"
+---| "reverse"
+---| "nocombine"
+---| string
+
+---A Neovim highlight-group definition.
+---@class (exact) GhTheme.HighlightGroup
+---@field fg? GhTheme.Color.CSSHexString
+---@field bg? GhTheme.Color.CSSHexString
+---@field sp? GhTheme.Color.CSSHexString
+---@field style? GhTheme.HighlightGroup.Style
+---@field blend? integer
+---@field nocombine? boolean
+---@field link? string
+---@field force? boolean
+
+---@param spec GhTheme.Spec
+---@return table<string, GhTheme.HighlightGroup>
+function M.from(spec)
+  local config = require('github-theme.config').options
+
+  if not spec then
+    print('there is no spec')
+  end
+  local editor = require('github-theme.group.editor').get(spec, config)
+  local syntax = require('github-theme.group.syntax').get(spec, config)
+
+  local res = collect.deep_extend(editor, syntax)
+
+  local default_enable_value = config.module_default
+  local mod_names = require('github-theme.config').module_names
+  for _, name in ipairs(mod_names) do
+    local kind = type(config.modules[name])
+    local opts = kind == 'boolean' and { enable = config.modules[name] }
+      or kind == 'table' and config.modules[name]
+      or {}
+    opts.enable = opts.enable == nil and default_enable_value or opts.enable
+
+    if opts.enable then
+      res = collect.deep_extend(
+        res,
+        require('github-theme.group.modules.' .. name).get(spec, config, opts)
+      )
+    end
+  end
+
+  local ovr = override.groups
+
+  if ovr.all then
+    override.extend_groups(res, template.parse(ovr.all, spec), {})
+  end
+
+  if ovr[spec.palette.meta.name] then
+    override.extend_groups(res, template.parse(ovr[spec.palette.meta.name], spec), {})
+  end
+
+  return res
+end
+
+---@param theme? GhTheme.Theme
+---@return table<string, GhTheme.HighlightGroup>
+function M.load(theme)
+  theme = theme or require('github-theme.config').theme
+  return M.from(require('github-theme.spec').load(theme))
+end
+
+return M
+```
+
+syntax:
+
+```lua
+local M = {}
+
+function M.get(spec, config)
+  local syn = spec.syntax
+  local stl = config.styles
+
+  ---Clears nvim's default highlighting for a highlight-group and allows
+  ---falling-back to another hl-group when multiple highlights/groups are
+  ---assigned/stacked at a particular screen position. This is just an empty
+  ---table.
+  ---
+  ---NOTE: assigning this to a group is different from explicitly setting a
+  ---group's foreground color to the global/default foreground color. When
+  ---multiple highlights are stacked/assigned to the same screen position, this
+  ---will allow the other highlights/groups to take effect, whereas explicitly
+  ---setting a hl-group's `fg` will not.
+  ---
+  ---|                           Setting                            | Fallback |
+  ---| ------------------------------------------------------------ | -------- |
+  ---| `GROUP = FALLBACK_OR_NONE` (i.e. set to this variable) (Lua) |   true   |
+  ---| Link to `@none`, `Fg`, or `NONE`                             |   true   |
+  ---| `GROUP = { fg = DEFAULT_FG }` (Lua)                          |   false  |
+  ---| `hi! clear GROUP` (Vim command)                              |   false  |
+  ---| `hi! GROUP NONE` (Vim command)                               |   false  |
+  local FALLBACK_OR_NONE = setmetatable({}, {
+    __newindex = function()
+      error('attempt to set index of readonly table', 2)
+    end,
+  })
+
+  -- TODO:
+  -- (1) add Commented style settings in config module
+  -- stylua: ignore
+  return {
+    Comment        = { fg = syn.comment, style = stl.comments, nocombine = true }, -- any comment
+    Constant       = { fg = syn.const, style = stl.constants }, -- (preferred) any constant
+    String         = { fg = syn.string, style = stl.strings }, -- a string constant: 'this is a string'
+    Character      = { link = 'String' }, -- a character constant: 'c', '\n'
+    Number         = { fg = syn.number, style = stl.numbers }, -- a number constant: 234, 0xff
+    Float          = { link = 'Number' }, -- a floating point constant: 2.3e10
+    Boolean        = { link = 'Number' }, -- a boolean constant: TRUE, false
+
+    Identifier     = { fg = syn.ident, style = stl.variables }, -- (preferred) any variable name
+    Function       = { fg = syn.func, style = stl.functions }, -- function name (also: methods for classes)
+
+    Statement      = { fg = syn.keyword, style = stl.keywords }, -- (preferred) any statement
+    Conditional    = { fg = syn.conditional, style = stl.conditionals }, -- if, then, else, endif, switch, etc.
+    Repeat         = { link = 'Conditional' }, -- for, do, while, etc.
+    Label          = { link = 'Conditional' }, -- case, default, etc.
+
+    Operator       = { fg = syn.operator, style = stl.operators }, -- 'sizeof', '+', '*', etc.
+    Keyword        = { fg = syn.keyword, style = stl.keywords }, -- any other keyword
+    Exception      = { link = 'Keyword' }, -- try, catch, throw
+
+    PreProc        = { fg = syn.preproc }, -- (preferred) generic Preprocessor
+    Include        = { link = 'PreProc' }, -- preprocessor #include
+    Define         = { link = 'PreProc' }, -- preprocessor #define
+    Macro          = { link = 'PreProc' }, -- same as Define
+    PreCondit      = { link = 'PreProc' }, -- preprocessor #if, #else, #endif, etc.
+
+    Type           = { fg = syn.type, style = stl.types }, -- (preferred) int, long, char, etc.
+    StorageClass   = { link = 'Type' }, -- static, register, volatile, etc.
+    Structure      = { link = 'Type' }, -- struct, union, enum, etc.
+    Typedef        = { link = 'Type' }, -- A typedef
+
+    Special        = { fg = spec.fg1 }, -- (preferred) any special symbol
+    SpecialChar    = { link = 'Special' }, -- special character in a constant
+    Tag            = { link = 'Special' }, -- you can use CTRL-] on this
+    Delimiter      = { link = 'Special' }, -- character that needs attention
+    SpecialComment = { link = 'Special' }, -- special things inside a comment
+    Debug          = { link = 'Special' }, -- debugging statements
+
+    Underlined     = { style = 'underline' }, -- (preferred) text that stands out, HTML links
+    Bold           = { style = 'bold' },
+    Italic         = { style = 'italic' },
+
+    -- ('Ignore', below, may be invisible...)
+    -- Ignore         = {}, -- (preferred) left blank, hidden  |hl-Ignore|
+
+    Error          = { fg = spec.diag.error }, -- (preferred) any erroneous construct
+    Todo           = { fg = spec.bg1, bg = spec.diag.info }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+
+    qfLineNr       = { link = 'lineNr' },
+    qfFileName     = { link = 'Directory' },
+
+    htmlTag         = { fg = syn.tag },
+    -- htmlH1       = {},
+    -- htmlH2       = {},
+
+    xmlAttrib  = { link ='htmlTag' },
+    xmlTagName = { link ='htmlTag' },
+
+    cssBraces         = { fg = syn.bracket },
+    cssMedia          = { link = 'Keyword' },
+    cssProp           = { link = 'Constant' },
+    cssPseudoClassId  = { link = 'Function' },
+
+    lessAmpersand      = { link = 'Function' },
+    lessClass          = { link = 'Function' },
+    lessClassCall      = { link = 'Function' },
+    lessCssAttribute   = { link = 'Constant' },
+    lessFunction       = { link = 'Constant' },
+    lessVariable       = { fg = spec.fg1 },
+
+    -- mkdHeading            = {},
+    -- mkdCode               = {},
+    -- mkdCodeDelimiter      = {},
+    -- mkdCodeStart          = {},
+    -- mkdCodeEnd            = {},
+    -- mkdLink               = {},
+
+    -- markdownHeadingDelimiter = {},
+    -- markdownCode             = {},
+    -- markdownCodeBlock        = {},
+    -- markdownH1               = {},
+    -- markdownH2               = {},
+    -- markdownLinkText         = {},
+
+    -- Diff filetype (runtime/syntax/diff.vim)
+    Added           = { fg = spec.git.add, bg = spec.diff.add }, -- added line in a diff
+    Changed         = { fg = spec.git.changed, bg = spec.diff.change }, -- changed line in a diff
+    Removed         = { fg = spec.git.removed, bg = spec.diff.delete },-- removed line in a diff
+    diffAdded       = { link = 'Added' }, -- Added lines ('^+.*' | '^>.*')
+    diffChanged     = { link = 'Changed' }, -- Changed lines ('^! .*')
+    diffRemoved     = { link = 'Removed' },-- Removed lines ('^-.*' | '^<.*')
+    diffOldFile     = { fg = spec.diag.warn }, -- Old file that is being diff against
+    diffNewFile     = { fg = spec.diag.hint }, -- New file that is being compared to the old file
+    diffFile        = { fg = spec.diag.info }, -- The filename of the diff ('diff --git a/readme.md b/readme.md')
+    diffLine        = { fg = syn.builtin2 }, -- Line information ('@@ -169,6 +169,9 @@')
+    diffIndexLine   = { fg = syn.preproc }, -- Index line of diff ('index bf3763d..94f0f62 100644')
+
+    -- Language specific -------------------------------------------------------
+
+    -- Json
+    jsonKeyword                                 = { fg = syn.tag }, -- Json keys (e.g. `"key": "value"`)
+    jsonNull                                    = { link = 'Constant' },
+
+    -- Lua
+    luaFunction                                 = { link = 'Keyword' }, -- Function keywords (`function`, `end`) (corrects upstream inaccuracy/bug)
+    luaTable                                    = FALLBACK_OR_NONE, -- Table brackets (`{}`)
+
+    -- Yaml
+    yamlBlockMappingKey                         = { fg = syn.tag },
+    yamlFlowMappingKey                          = { fg = syn.tag },
+  }
+end
+
+return M
+```
+
+completion:
+```lua
+-- https://github.com/hrsh7th/nvim-cmp
+
+local M = {}
+
+---@param spec GhTheme.Spec
+---@param config GhTheme.Config.Options
+---@param _opts GhTheme.Config.Module
+function M.get(spec, config, _opts)
+  local has_ts = config.modules.treesitter == true
+    or type(config.modules.treesitter) == 'table' and config.modules.treesitter.enable
+  local syn = spec.syntax
+
+  -- stylua: ignore
+  ---@type table<string, GhTheme.HighlightGroup>
+  return {
+    CmpDocumentation         = { fg = spec.fg1, bg = spec.bg0 },
+    CmpDocumentationBorder   = { fg = spec.sel0, bg = spec.bg0 },
+
+    CmpItemAbbr              = { fg = spec.fg1, },
+    CmpItemAbbrDeprecated    = { fg = syn.dep, style = 'strikethrough' },
+    CmpItemAbbrMatch         = { fg = syn.func, },
+    CmpItemAbbrMatchFuzzy    = { fg = syn.func, },
+
+    CmpItemKindDefault       = { fg = spec.fg2, },
+    CmpItemMenu              = { link = 'Comment' },
+
+    CmpItemKindKeyword       = { link = 'Keyword' },
+
+    CmpItemKindVariable      = { link = has_ts and '@variable' or  'Identifier' },
+    CmpItemKindConstant      = { link = has_ts and '@constant' or 'Constant' },
+    CmpItemKindReference     = { link = 'Keyword' },
+    CmpItemKindValue         = { link = 'Keyword' },
+
+    CmpItemKindFunction      = { link = 'Function' },
+    CmpItemKindMethod        = { link = 'Function' },
+    CmpItemKindConstructor   = { link = has_ts and '@constructor' or 'Type' },
+
+    CmpItemKindInterface     = { link = 'Constant' },
+    CmpItemKindEvent         = { link = 'Constant' },
+    CmpItemKindEnum          = { link = 'Constant' },
+    CmpItemKindUnit          = { link = 'Constant' },
+
+    CmpItemKindClass         = { link = 'Type' },
+    CmpItemKindStruct        = { link = 'Type' },
+
+    CmpItemKindModule        = { link = has_ts and '@module'  or 'Identifier' },
+
+    CmpItemKindProperty      = { link = has_ts and '@property' or  'Identifier' },
+    CmpItemKindField         = { link = has_ts and '@variable.member' or 'Identifier' },
+    CmpItemKindTypeParameter = { link = has_ts and '@variable.member' or 'Identifier' },
+    CmpItemKindEnumMember    = { link = has_ts and '@variable.member' or 'Identifier' },
+    CmpItemKindOperator      = { link = 'Operator' },
+    CmpItemKindSnippet       = { fg = spec.fg2 },
+  }
+end
+
+return M
+```
+
+Notifications:
+```lua
+-- https://github.com/rcarriga/nvim-notify
+
+local M = {}
+
+---@param spec GhTheme.Spec
+---@param _config GhTheme.Config.Options
+---@param _opts GhTheme.Config.Module
+function M.get(spec, _config, _opts)
+  local c = spec.palette
+
+  -- stylua: ignore
+  ---@type table<string, GhTheme.HighlightGroup>
+  return {
+    NotifyERRORTitle      = { fg = c.red.base  },
+    NotifyWARNTitle       = { fg = c.yellow.base },
+    NotifyINFOTitle       = { fg = c.green.base },
+    NotifyDEBUGTitle      = { fg = spec.fg1 },
+    NotifyTRACETitle      = { fg = c.magenta.bright },
+
+    NotifyERRORIcon       = { link = 'NotifyERRORTitle' },
+    NotifyWARNIcon        = { link = 'NotifyWARNTitle' },
+    NotifyINFOIcon        = { link = 'NotifyINFOTitle' },
+    NotifyDEBUGIcon       = { link = 'NotifyDEBUGTitle' },
+    NotifyTRACEIcon       = { link = 'NotifyTRACETitle' },
+
+    NotifyERRORBorder     = { link = 'NotifyERRORTitle' },
+    NotifyWARNBorder      = { link = 'NotifyWARNTitle' },
+    NotifyINFOBorder      = { link = 'NotifyINFOTitle' },
+    NotifyDEBUGBorder     = { link = 'NotifyDEBUGTitle' },
+    NotifyTRACEBorder     = { link = 'NotifyTRACETitle' },
+
+    NotifyERRORBody       = { link = 'NotifyERRORTitle' },
+    NotifyWARNBody        = { link = 'NotifyWARNTitle' },
+    NotifyINFOBody        = { link = 'NotifyINFOTitle' },
+    NotifyDEBUGBody       = { link = 'NotifyDEBUGTitle' },
+    NotifyTRACEBody       = { link = 'NotifyTRACETitle' },
+  }
+end
+
+return M
+```
+
+Use this knowledge to update highlights accordingly when you respond
