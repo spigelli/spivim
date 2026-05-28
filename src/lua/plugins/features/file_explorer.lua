@@ -32,6 +32,7 @@ return {
 	},
 	keys = require("config.keys").nvim_tree,
 	opts = {
+		on_attach = require("config.keys").nvim_tree_on_attach,
 		update_focused_file = {
 			enable = true,
 			update_cwd = true,
@@ -60,6 +61,9 @@ return {
 		},
 		filesystem_watchers = {
 			enable = true,
+		},
+		filters = {
+			git_ignored = false,
 		},
 		renderer = {
 			root_folder_label = ":t",

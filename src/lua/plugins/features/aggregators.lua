@@ -76,11 +76,29 @@ return {
     },
     config = function(_, opts)
       local wk = require("which-key")
+      local lazyvim = require("lazyvim")
       wk.setup(opts)
       if not vim.tbl_isempty(opts.defaults) then
-        LazyVim.warn("which-key: opts.defaults is deprecated. Please use opts.spec instead.")
+        vim.notify("which-key: opts.defaults is deprecated. Please use opts.spec instead.", vim.log.levels.WARN)
         wk.register(opts.defaults)
       end
     end,
-  }
+    dependencies = {
+      "LazyVim/LazyVim",
+    },
+  },
+  {
+    "LazyVim/LazyVim",
+  },
+  {
+    import = "lazyvim.plugins.extras.ai.copilot",
+    event = "VeryLazy",
+    config = function()
+      -- Display a notification when Copilot is active
+      vim.notify("Copilot is being configured", "info", { title = "Copilot" })
+    end,
+    dependencies = {
+      "LazyVim/LazyVim",
+    },
+  },
 }
